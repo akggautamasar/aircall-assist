@@ -11,7 +11,7 @@ android {
         targetSdk = 36
         versionCode = 3
         versionName = "0.3.0"
-        buildConfigField("String", "RELAY_URL", ""ws://10.0.2.2:8787"")
+        buildConfigField("String", "RELAY_URL", "\"ws://10.0.2.2:8787\"")
     }
     buildFeatures {
         compose = true
