@@ -9,9 +9,9 @@ android {
         applicationId = "com.akggautamasar.aircallassist"
         minSdk = 26
         targetSdk = 37
-        versionCode = 3
-        versionName = "0.3.0"
-        buildConfigField("String", "RELAY_URL", "\"ws://10.0.2.2:8787\"")
+        versionCode = 4
+        versionName = "0.4.0"
+        buildConfigField("String", "RELAY_URL", "\"wss://aircall-assist.onrender.com\"")
     }
     buildFeatures {
         compose = true
