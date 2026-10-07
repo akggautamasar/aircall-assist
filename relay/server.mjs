@@ -28,49 +28,62 @@ wss.on('connection', (ws) => {
         const old = peers.get(code);
         if (old && old !== ws) old.close(4001, 'replaced');
         peers.set(code, ws);
-        send(ws, { type:'status', value:'registered' });
+        send(ws, { type: 'status', value: 'registered' });
         return;
       }
 
       if (msg.type === 'pair') {
-        const target = peers.get(String(msg.targetCode || '').toUpperCase());
+        const targetCode = String(msg.targetCode || '').toUpperCase();
+        const target = peers.get(targetCode);
         if (!target) {
-          send(ws, { type:'status', value:'target_offline' });
+          send(ws, { type: 'status', value: 'target_offline' });
           return;
         }
-        peerCode = String(msg.targetCode).toUpperCase();
-        send(ws, { type:'status', value:'paired' });
-        send(target, { type:'status', value:'paired' });
+        peerCode = targetCode;
+        target.peerCode = code;
+        send(ws, { type: 'status', value: 'paired' });
+        send(target, { type: 'status', value: 'paired' });
         return;
       }
 
       if (msg.type === 'message') {
         if (!peerCode) {
-          send(ws, { type:'status', value:'not_paired' });
+          send(ws, { type: 'status', value: 'not_paired' });
           return;
         }
         const target = peers.get(peerCode);
         if (!target) {
-          send(ws, { type:'status', value:'target_offline' });
+          send(ws, { type: 'status', value: 'target_offline' });
           return;
         }
+        const text = String(msg.text || '').trim();
+        if (!text) return;
         send(target, {
-          type:'message',
+          type: 'message',
           id: String(msg.id || randomUUID()),
           senderId: deviceId,
-          text: String(msg.text || ''),
+          text,
           speak: Boolean(msg.speak),
           createdAt: Number(msg.createdAt || Date.now())
         });
-        send(ws, { type:'status', value:'delivered' });
+        send(ws, { type: 'status', value: 'delivered' });
       }
     } catch {
-      send(ws, { type:'status', value:'bad_request' });
+      send(ws, { type: 'status', value: 'bad_request' });
     }
   });
 
   ws.on('close', () => {
-    if (code && peers.get(code) === ws) peers.delete(code);
+    if (code && peers.get(code) === ws) {
+      peers.delete(code);
+      if (peerCode) {
+        const peer = peers.get(peerCode);
+        if (peer && peer.peerCode === code) {
+          peer.peerCode = null;
+          send(peer, { type: 'status', value: 'partner_offline' });
+        }
+      }
+    }
   });
 });
 
