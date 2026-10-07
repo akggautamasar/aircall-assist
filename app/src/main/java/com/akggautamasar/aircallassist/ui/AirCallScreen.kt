@@ -18,16 +18,16 @@ fun AirCallScreen(identity: DeviceIdentity, tts: TtsManager) {
     var paired by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
 
-    fun startAssist() {
-        val intent = Intent(androidx.compose.ui.platform.LocalContext.current, CallAssistService::class.java).apply {
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    fun startAssist(speak: Boolean) {
+        val intent = Intent(context, CallAssistService::class.java).apply {
             action = CallAssistService.ACTION_START
             putExtra(CallAssistService.EXTRA_PARTNER, partnerCode)
-            putExtra(CallAssistService.EXTRA_SPEAK, true)
+            putExtra(CallAssistService.EXTRA_SPEAK, speak)
         }
-        ContextCompat.startForegroundService(androidx.compose.ui.platform.LocalContext.current, intent)
+        ContextCompat.startForegroundService(context, intent)
     }
-
-    val context = androidx.compose.ui.platform.LocalContext.current
 
     Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text("AirCall Assist", style = MaterialTheme.typography.headlineMedium)
@@ -54,7 +54,7 @@ fun AirCallScreen(identity: DeviceIdentity, tts: TtsManager) {
         Button(
             onClick = {
                 paired = partnerCode.length == 9 && partnerCode != identity.pairingCode
-                if (paired) startAssist()
+                if (paired) startAssist(callAssist)
             },
             enabled = !paired && partnerCode.length == 9,
             modifier = Modifier.fillMaxWidth()
@@ -71,7 +71,7 @@ fun AirCallScreen(identity: DeviceIdentity, tts: TtsManager) {
                 checked = callAssist,
                 onCheckedChange = {
                     callAssist = it
-                    if (it && paired) startAssist()
+                    if (it && paired) startAssist(true)
                     if (!it) context.stopService(Intent(context, CallAssistService::class.java))
                 }
             )
