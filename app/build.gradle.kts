@@ -4,11 +4,11 @@ plugins {
 }
 android {
     namespace = "com.akggautamasar.aircallassist"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "com.akggautamasar.aircallassist"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 3
         versionName = "0.3.0"
         buildConfigField("String", "RELAY_URL", "\"ws://10.0.2.2:8787\"")
